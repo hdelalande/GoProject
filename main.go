@@ -61,6 +61,7 @@ func main() {
         pixel:= color.Gray{uint8(lum / 256)}
         imgSet.Set(x, y, pixel)
       }
+
     }
 
     outFile, err := os.Create("changed.jpg")
@@ -69,6 +70,7 @@ func main() {
     }
     defer outFile.Close()
     jpeg.Encode(outFile, imgSet, nil)
+    testNoirEtBlanc:= true
 
   }
   if testNoirEtBlanc == true {
