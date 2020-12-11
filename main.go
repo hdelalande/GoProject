@@ -10,12 +10,6 @@ import (
   "log"
 )
 
-type pixel struct{ /*Notre structure d'un pixel = son intensité, son opacité, sa position en x et sa position en y*/
-  intensPix uint32
-  opac uint32
-  Dx int
-  Dy int 
-}
 
 func main() {
   argument := os.Args[1]
@@ -45,9 +39,6 @@ func main() {
         fmt.Println("Tu dois nous envoyer une image en noir et blanc bg")
         break
       } 
-      InfoPixel := pixel{intensPix:r, Dx:i, Dy:j, opac:a} 
-      list = append(list, InfoPixel) /*Stockage des infos de chaque pixels dans une liste*/
-      tabIntens [r] += 1 /* Génére un tableau ayant comme indice l'intensité du pixel et en valeur le nombre total de pixels ayant cette intensité*/
     }
   }
   if testNoirEtBlanc == false {
