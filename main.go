@@ -1,7 +1,9 @@
 package main
 
 import (
-  "fmt" 
+  "fmt"
+  "image"
+  "image/color"
   "os"
 //  "image"
   "image/jpeg"
@@ -54,10 +56,28 @@ func main() {
   }
   if testNoirEtBlanc == false {
     /*Dans cette partie on peut imaginer un code permettant de faire passer une image en N&B avant de faire le traitement de l'image*/
+    imgSet := image.NewRGBA(taille)
+    for y := 0; y < taille.Max.Y; y++ {
+      for x := 0; x < taille.Max.X; x++ {
+        oldPixel := imData.At(x, y)
+        r, g, b, _ := oldPixel.RGBA()
+        y := 0.299*float64(r) + 0.587*float64(g) + 0.114*float64(b)
+        pixel := color.Gray{uint8(y / 256)}
+        imgSet.Set(x, int(y), pixel)
+      }
+    }
+
+    outFile, err := os.Create("changed.jpg")
+    if err != nil {
+      log.Fatal(err)
+    }
+    defer outFile.Close()
+    jpeg.Encode(outFile, imgSet, nil)
+
   }
-  if testNoirEtBlanc == true {
+    if testNoirEtBlanc == true {
     /*histogramme, égalisation et normalisation des pixels*/
-  }
+    }
     fmt.Println(list[9].intensPix)
     fmt.Println(testNoirEtBlanc)
 }
