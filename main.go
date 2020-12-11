@@ -24,7 +24,6 @@ func main() {
         fmt.Println(err) /* Renvoi une erreur si le fichier n'est pas une image jpeg ou jpg */
   }
 
-  var list []pixel
   var testNoirEtBlanc bool
   var tabIntens [65536]uint32
   taille := imData.Bounds()
