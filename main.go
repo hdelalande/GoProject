@@ -30,14 +30,10 @@ func main() {
 
   var list []pixel
   var testNoirEtBlanc bool
-  var tabIntens [2^32-1]uint32
+  var tabIntens [65536]uint32
   taille := imData.Bounds()
 	hauteur := taille.Dy()
   largeur := taille.Dx() 
-  /* 
-  ici il faudra décomposer la hauteur et la largeur dans d'autres
-  variables pour faire  fonctionner les goroutines 
-  */
   testNoirEtBlanc = true
   for i:=0; i<largeur; i++ {
     for j:=0; j<hauteur; j++{
@@ -49,7 +45,7 @@ func main() {
       } 
       InfoPixel := pixel{intensPix:r, Dx:i, Dy:j, opac:a} 
       list = append(list, InfoPixel) /*Stockage des infos de chaque pixels dans une liste*/
-      tabIntens [r] += 1 /* Génére un tableau ayant comme indice l'insité du pixel et en valeur le nombre total de pixels ayant cette intensité*/
+      tabIntens [r] += 1 /* Génére un tableau ayant comme indice l'intensité du pixel et en valeur le nombre total de pixels ayant cette intensité*/
     }
   }
   if testNoirEtBlanc == false {
