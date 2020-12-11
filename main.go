@@ -103,6 +103,8 @@ func main() {
         }*/
       }
 
+      //test
+
       fmt.Println(list[9].intensPix)
       fmt.Println(testNoirEtBlanc)
 }
