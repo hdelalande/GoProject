@@ -1,7 +1,9 @@
 package main
 
 import (
-  "fmt" 
+  "fmt"
+  "image"
+  "image/color"
   "os"
 //  "image"
   "image/jpeg"
@@ -32,12 +34,17 @@ func main() {
   var testNoirEtBlanc bool
   var tabIntens [65536]uint32
   taille := imData.Bounds()
+<<<<<<< HEAD
   hauteur := taille.Dy()
   largeur := taille.Dx()
   /*
     ici il faudra décomposer la hauteur et la largeur dans d'autres
     variables pour faire  fonctionner les goroutines
   */
+=======
+	hauteur := taille.Dy()
+  largeur := taille.Dx() 
+>>>>>>> f13aee563eccbd267113517c9bc6cd4629724376
   testNoirEtBlanc = true
   for i := 0; i < largeur; i++ {
     for j := 0; j < hauteur; j++ {
@@ -49,12 +56,35 @@ func main() {
       }
       InfoPixel := pixel{intensPix: r, Dx: i, Dy: j, opac: a}
       list = append(list, InfoPixel) /*Stockage des infos de chaque pixels dans une liste*/
+<<<<<<< HEAD
       tabIntens[r] += 1              /* Génére un tableau ayant comme indice l'insité du pixel et en valeur le nombre total de pixels ayant cette intensité*/
+=======
+      tabIntens [r] += 1 /* Génére un tableau ayant comme indice l'intensité du pixel et en valeur le nombre total de pixels ayant cette intensité*/
+>>>>>>> f13aee563eccbd267113517c9bc6cd4629724376
     }
   }
   if testNoirEtBlanc == false {
     /*Dans cette partie on peut imaginer un code permettant de faire passer une image en N&B avant de faire le traitement de l'image*/
+    imgSet := image.NewRGBA(taille)
+    for y := 0; y < taille.Max.Y; y++ {
+      for x := 0; x < taille.Max.X; x++ {
+        oldPixel := imData.At(x, y)
+        r, g, b, _ := oldPixel.RGBA()
+        lum := 0.299*float64(r) + 0.587*float64(g) + 0.114*float64(b)
+        pixel:= color.Gray{uint8(lum / 256)}
+        imgSet.Set(x, y, pixel)
+      }
+    }
+
+    outFile, err := os.Create("changed.jpg")
+    if err != nil {
+      log.Fatal(err)
+    }
+    defer outFile.Close()
+    jpeg.Encode(outFile, imgSet, nil)
+
   }
+<<<<<<< HEAD
 
   if testNoirEtBlanc == true {
   var ValuePixel [65536]float32
@@ -85,6 +115,11 @@ func main() {
       }
     }*/
 
+=======
+    if testNoirEtBlanc == true {
+    /*histogramme, égalisation et normalisation des pixels*/
+    }
+>>>>>>> f13aee563eccbd267113517c9bc6cd4629724376
     fmt.Println(list[9].intensPix)
     fmt.Println(testNoirEtBlanc)
   }
