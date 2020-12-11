@@ -71,13 +71,39 @@ func main() {
     jpeg.Encode(outFile, imgSet, nil)
 
   }
-    if testNoirEtBlanc == true {
-    /*histogramme, égalisation et normalisation des pixels*/
-    }
-    fmt.Println(list[9].intensPix)
-    fmt.Println(testNoirEtBlanc)
-}
+  if testNoirEtBlanc == true {
+        var ValuePixel [65536]float32
 
+        for i := 0; i < largeur; i++ {
+          for j := 0; j < hauteur; j++ {
+            r, g, b, a := imData.At(i, j).RGBA()
+            salut := g + b + a
+            fmt.Println("Yo les gars : ", salut)
+            ValuePixel[r] = ValuePixel[r] + 1
+            fmt.Println("Valeur du tab en ", r, " : ", ValuePixel[r])
+          }
+        }
+
+        var total float32
+        for z := 0; z < 65536; z++ {
+          total += ValuePixel[z]
+        }
+
+        fmt.Println("Nbr total pixel : ", total)
+        fmt.Println("Largeur :", largeur, "Hauteur : ", hauteur)
+
+        //var ValuePixelEqua [65536]float32
+
+        /*for i := 0; i < largeur; i++ {
+          for j := 0; j < hauteur; j++ {
+              ValuePixelEqua[]
+          }
+        }*/
+      }
+
+      fmt.Println(list[9].intensPix)
+      fmt.Println(testNoirEtBlanc)
+}
 //test
 
   /*
