@@ -70,9 +70,9 @@ func main() {
       for x := 0; x < taille.Max.X; x++ {
         oldPixel := imData.At(x, y)
         r, g, b, _ := oldPixel.RGBA()
-        lum := 0.299*float64(r) + 0.587*float64(g) + 0.114*float64(b)
-        pixel:= color.Gray{uint8(lum / 256)}
-        imgSet.Set(x, y, pixel)
+        y := 0.299*float64(r) + 0.587*float64(g) + 0.114*float64(b)
+        pixel := color.Gray{uint8(y / 256)}
+        imgSet.Set(x, int(y), pixel)
       }
     }
 
