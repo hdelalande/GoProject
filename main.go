@@ -19,7 +19,7 @@ func main() {
   argument := os.Args[1]
   catFile, err := os.Open(argument)
   if err != nil {
-	  log.Fatal(err) /* Fatal erreur si il n'y a pas de fichier à ouvrir en argument */ 
+	  log.Fatal(err) /* Renvoi une erreur si il n'y a pas de fichier à ouvrir en argument */ 
   }
   defer catFile.Close()
 
