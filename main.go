@@ -8,6 +8,7 @@ import (
 //  "image"
   "image/jpeg"
   "log"
+  "sync"
 )
 
 
@@ -29,7 +30,10 @@ func main() {
   taille := imData.Bounds()
 	hauteur := taille.Dy()
   largeur := taille.Dx() 
+  NBboucles := hauteur*largeur
   testNoirEtBlanc = true
+  var wg sync.WaitGroup
+  wg.Add(NBboucles)
   for i:=0; i<largeur; i++ {
     for j:=0; j<hauteur; j++{
       r,g,b,a := imData.At(i,j).RGBA()
@@ -37,8 +41,12 @@ func main() {
         testNoirEtBlanc = false 
         fmt.Println("Tu dois nous envoyer une image en noir et blanc bg")
         break
-      } 
+      } else {
+        continue
+      }
+      break
     }
+    wg.Wait()
   }
   if testNoirEtBlanc == false {
     /*Dans cette partie, nous transformons l'image en noir est blanc si ce n'est pas le cas*/
