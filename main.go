@@ -41,15 +41,15 @@ func main() {
     }
   }
   if testNoirEtBlanc == false {
-    /*Dans cette partie on peut imaginer un code permettant de faire passer une image en N&B avant de faire le traitement de l'image*/
-    imgSet := image.NewRGBA(taille)
-    for y := 0; y < taille.Max.Y; y++ {
+    /*Dans cette partie, nous transformons l'image en noir est blanc si ce n'est pas le cas*/
+    imgSet := image.NewRGBA(taille) //on commence par créer une image "vide" de la même taille que l'image d'origine.
+    for y := 0; y < taille.Max.Y; y++ { // deux boucles pour parcourir l'ensemble des pixels constituant l'image.
       for x := 0; x < taille.Max.X; x++ {
-        oldPixel := imData.At(x, y)
-        r, g, b, _ := oldPixel.RGBA()
-        lum := 0.299*float64(r) + 0.587*float64(g) + 0.114*float64(b)
-        pixel:= color.Gray{uint8(lum / 256)}
-        imgSet.Set(x, y, pixel)
+        oldPixel := imData.At(x, y) // on récupère le pixel à la position x,y.
+        r, g, b, _ := oldPixel.RGBA() // on recupère les valeurs d'intensité en rouge, vert et bleu.
+        lum := 0.299*float64(r) + 0.587*float64(g) + 0.114*float64(b) // on calcule l'intensité la mieux adaptée grace à une formule.
+        pixel:= color.Gray16{uint16(lum / 55536)} // on fait appel à color.Gray pour transformer le pixel en gris
+        imgSet.Set(x, y, pixel) // 
       }
 
     }
