@@ -8,7 +8,7 @@ import (
 //  "image"
   "image/jpeg"
   "log"
-  "sync"
+  //"sync"
 )
 
 
@@ -26,28 +26,27 @@ func main() {
   }
 
   var testNoirEtBlanc bool
-  var tabIntens [65536]uint32
   taille := imData.Bounds()
 	hauteur := taille.Dy()
   largeur := taille.Dx() 
-  NBboucles := hauteur*largeur
+  //NBboucles := hauteur*largeur
   testNoirEtBlanc = true
-  var wg sync.WaitGroup
-  wg.Add(NBboucles)
+  //var wg sync.WaitGroup
+  //wg.Add(NBboucles)
   for i:=0; i<largeur; i++ {
     for j:=0; j<hauteur; j++{
       r,g,b,a := imData.At(i,j).RGBA()
       if r!=g || g!=b || r!=b { /*test si les intensités RGB sont différente pour detecter si l'image est en couleur*/
         testNoirEtBlanc = false 
-        fmt.Println("Tu dois nous envoyer une image en noir et blanc bg")
+        fmt.Println("Tu dois nous envoyer une image en noir et blanc bg et l'opacité est de", a)
         break
       } else {
         continue
       }
-      break
     }
-    wg.Wait()
+    break
   }
+  //wg.Wait()
   if testNoirEtBlanc == false {
     /*Dans cette partie, nous transformons l'image en noir est blanc si ce n'est pas le cas*/
     imgSet := image.NewRGBA(taille) //on commence par créer une image "vide" de la même taille que l'image d'origine.
@@ -56,10 +55,9 @@ func main() {
         oldPixel := imData.At(x, y) // on récupère le pixel à la position x,y.
         r, g, b, _ := oldPixel.RGBA() // on recupère les valeurs d'intensité en rouge, vert et bleu.
         lum := 0.299*float64(r) + 0.587*float64(g) + 0.114*float64(b) // on calcule l'intensité la mieux adaptée grace à une formule.
-        pixel:= color.Gray16{uint16(lum / 55536)} // on fait appel à color.Gray pour transformer le pixel en gris
+        pixel:= color.Gray16{uint16(lum)} // on fait appel à color.Gray pour transformer le pixel en gris
         imgSet.Set(x, y, pixel) // 
       }
-
     }
 
     outFile, err := os.Create("changed.jpg")
@@ -68,7 +66,7 @@ func main() {
     }
     defer outFile.Close()
     jpeg.Encode(outFile, imgSet, nil)
-    testNoirEtBlanc:= true
+    testNoirEtBlanc = true
 
   }
   if testNoirEtBlanc == true {
@@ -103,7 +101,7 @@ func main() {
 
       //test
 
-      fmt.Println(list[9].intensPix)
+  
       fmt.Println(testNoirEtBlanc)
 }
 //test
