@@ -1,15 +1,14 @@
 package main
 
 import (
-  "fmt"
-  "image"
-  "image/color"
-  "os"
-//  "image"
-  "image/jpeg"
-  "log"
-  "math"
-  "sync"
+    "fmt"
+    "image"
+    "image/color"
+    "os"
+  //"image"
+    "image/jpeg"
+    "log"
+    "math"
 )
 
 func main() {
@@ -25,90 +24,145 @@ func main() {
     fmt.Println(err) /* Renvoi une erreur si le fichier n'est pas une image jpeg ou jpg */
   }
 
+
   taille := imData.Bounds()
+  hauteur := taille.Dy()
+  largeur := taille.Dx()
+  NbPixel := largeur*hauteur
+  Decoupe := 100
+  for i:=0; i<largeur; i++ {
+  for j:=0; j<hauteur; j++{
+    r,g,b,a := imData.At(i,j).RGBA()
+    if r!=g || g!=b || r!=b { /*test si les intensités RGB sont différente pour detecter si l'image est en couleur*/
+      fmt.Println("Tu dois nous envoyer une image en noir et blanc bg et l'opacité est de", a)
+      imData = passagenoiretblanc(imData)
+      break
+    } else {
+      continue
+    }
+  }
+  break
+  }
+  var NBboucles int
+  restelargeur := math.Mod(float64(largeur),Decoupe)
+  if restelargeur != 0{
+    NBboucles = (largeur/Decoupe)+1
+  } 
+  if restelargeur == 0{
+    NBboucles = (largeur/Decoupe)
+  }
+  var HistogrammePixel [65536]uint32
+  var TabImageEga [65536]float32
+  c1 := make(chan [32768]uint32)
+  c2 := make(chan [32768]uint32)
+  c3 := make(chan [32768]uint32)
+  c4 := make(chan [32768]uint32)
+  for i:=largeur ; i>0; i=i-Decoupe{
+    if i>Decoupe{
+      go  histogramme(imData,(i-Decoupe),i,c1,c2)
+    }
+    if i<Decoupe{
+      go histogramme(imData,0,i,c1,c2)
+    }
+  }
+  var tabC1 [][32768]uint32
+  var tabC2 [][32768]uint32
+  for b:=0; b<NBboucles; b++{
+    tabC1[b] = <- c1
+    tabC2[b] = <- c2 
+    for p:=0; p<32768; p++{
+      HistogrammePixel[p] += tabC1[b][p]
+    }
+    for p:=32768; p<65536; p++{
+      HistogrammePixel[p] += tabC2[b][p-32768]
+    }
+  }
+  TabDesProba := probapixel(HistogrammePixel,NombrePixel)
+  for i:=largeur ; i>0; i=i-Decoupe{
+    if i>Decoupe{
+      go  egalisation(imData,(i-Decoupe),i,c3,c4)
+    }
+    if i<Decoupe{
+      go egalisation(imData,0,i,c3,c4)
+    }
+  }
+  var tabC3 [][32768]uint32
+  var tabC4 [][32768]uint32
+  for b:=0; b<NBboucles; b++{
+    tabC3[b] = <- c3
+    tabC4[b] = <- c4 
+    for p:=0; p<32768; p++{
+      TabImageEga[p] += tabC1[b][p]
+    }
+    for p:=32768; p<65536; p++{
+      TabImageEga[p] += tabC2[b][p-32768]
+    }
+  }
+  creationimage(imData, TabImageEga)
+}
+
+
+
+func histogramme(Data image.Image, largeur1 int, largeur2 int, c1 chan [32768]uint32, c2 chan [32768]uint32){
+  var ValuePixel1 [32768]uint32 // Tableau qui va permettre de savoir combien il y aura de pixels pour chaque intensité
+  var ValuePixel2 [32768]uint32
+  taille := Data.Bounds()
+	hauteur := taille.Dy()
+
+  // Dans cette boucle, on compte le nbr de pixels par intensité
+  for i := largeur1; i < largeur2; i++ {
+    for j := 0; j < hauteur; j++ {
+      r, _, _, _ := Data.At(i, j).RGBA() // On récupère la valeur du pixel en RGBA
+      if r < 32768{
+        ValuePixel1[r] = ValuePixel1[r] + 1 // On ajoute 1 à l'index d'intensité r
+      }
+      if r >= 32768{
+        ValuePixel2[r-32768] = ValuePixel2[r-32768] + 1
+      }
+    }
+  }
+  c1 <- ValuePixel1
+  c2 <- ValuePixel2
+}
+
+func probapixel(ValuePixel []uint32, NombrePixel int) [65536]float32{
+  var ProbaPixelCumul [65536]float32 // Tableau des probas cumulées
+  var max uint32 // Variable permettant de faire la cumulation des probas
+  max = 0 
+  // Dans cette boucle, on calcul la probabilité cumulée de chaque pixel
+  for i := 0; i < 65536; i++ {
+    max = max + ValuePixel[i] // Pour faire la proba cumulée
+    ProbaPixelCumul[i] = float32(max) / float32(NombrePixel) // On divise ce nbr de pixels par le nombre total de pixel
+  }
+  return ProbaPixelCumul
+}
+
+func egalisation(ProbaPixelCumul [65536]float32, Data image.Image, c3 chan [32768]uint32, c4 chan [32768]uint32){
+  var ImageEga1 [65536]float32 // Tableau contenant les intensités de pixels égalisés
+  var ImageEga2 [65536]float32
+  // ImagEga[z] = x
+  // z correspond à l'intensité du pixel sur l'image de base
+  // x sera la nouvelle intensité pour l'image égalisée
+
+  // Dans cette boucle, on calcule les nouvelles inensités (égalisées) avec la formule
+  taille := Data.Bounds()
 	hauteur := taille.Dy()
   largeur := taille.Dx()
-  for i:=0; i<largeur; i++ {
-    for j:=0; j<hauteur; j++{
-      r,g,b,a := imData.At(i,j).RGBA()
-      if r!=g || g!=b || r!=b { /*test si les intensités RGB sont différente pour detecter si l'image est en couleur*/
-        fmt.Println("Tu dois nous envoyer une image en noir et blanc bg et l'opacité est de", a)
-        imData = passagenoiretblanc(imData)
-        break
-      } else {
-        continue
+  for i := 0; i < largeur; i++ {
+    for j := 0; j < hauteur; j++ {
+      r, _, _, _ := Data.At(i, j).RGBA() // Pareil que ma boucle précédente
+      if r < 32768{
+        ImageEga1[r] = 65535 * ProbaPixelCumul[r] // Formule pour normalisé une image
+      }
+      if r >= 32768{
+        ImageEga2[r] = 65535 * ProbaPixelCumul[r]
       }
     }
-    break
   }
-var NBboucles int
-restelargeur := math.Mod(float64(largeur),100)
-if restelargeur != 0{
-  NBboucles = (largeur/100)+1
-} 
-if restelargeur == 0{
-  NBboucles = (largeur/100)
-}
-var ValuePixel [65536]uint32 // Tableau qui va permettre de savoir combien il y aura de pixels pour chaque intensité
-var wg1 sync.WaitGroup
-wg1.Add(NBboucles)
-for i:=largeur ; i>0; i=i-100{
-  if i>100{
-    go  histogramme(imData,(i-100),i,ValuePixel,&wg1)
-  }
-  if i<100{
-    go histogramme(imData,0,i,ValuePixel,&wg1)
-  }
-}
+c3 <- ImageEga1
+c4 <- ImageEga2
 }
 
-
-  
-  //wg.Wait()
-func histogramme(Data image.Image, largeur1 int, largeur2 int,ValuePixel [65536]uint32, wg1 *sync.WaitGroup) [65536]uint32{
-    taille := Data.Bounds()
-	  hauteur := taille.Dy()
-
-    // Dans cette boucle, on compte le nbr de pixels par intensité
-    for i := largeur1; i < largeur2; i++ {
-      for j := 0; j < hauteur; j++ {
-        r, _, _, _ := Data.At(i, j).RGBA() // On récupère la valeur du pixel en RGBA
-        ValuePixel[r] = ValuePixel[r] + 1 // On ajoute 1 à l'index d'intensité r
-      }
-    }
-    wg1.Done()
-    return ValuePixel
-  }
-func probapixel(ValuePixel []uint32, NombrePixel int) [65536]float32{
-    var ProbaPixelCumul [65536]float32 // Tableau des probas cumulées
-    var max uint32 // Variable permettant de faire la cumulation des probas
-    max = 0 
-    // Dans cette boucle, on calcul la probabilité cumulée de chaque pixel
-    for i := 0; i < 65536; i++ {
-      max = max + ValuePixel[i] // Pour faire la proba cumulée
-      ProbaPixelCumul[i] = float32(max) / float32(NombrePixel) // On divise ce nbr de pixels par le nombre total de pixel
-    }
-    return ProbaPixelCumul
-}
-
-func égalisation(ProbaPixelCumul []float32, Data image.Image) [65536]float32{
-    var ImageEga [65536]float32 // Tableau contenant les intensités de pixels égalisés
-    // ImagEga[z] = x
-    // z correspond à l'intensité du pixel sur l'image de base
-    // x sera la nouvelle intensité pour l'image égalisée
-
-    // Dans cette boucle, on calcule les nouvelles inensités (égalisées) avec la formule
-    taille := Data.Bounds()
-	  hauteur := taille.Dy()
-    largeur := taille.Dx()
-    for i := 0; i < largeur; i++ {
-      for j := 0; j < hauteur; j++ {
-        r, _, _, _ := Data.At(i, j).RGBA() // Pareil que ma boucle précédente
-        ImageEga[r] = 65535 * ProbaPixelCumul[r] // Formule pour normalisé une image
-      }
-    }
-  return ImageEga
-  }
 func creationimage(Data image.Image, ImageEga []float32)  {
   // Création de l'image égalisée
   taille := Data.Bounds()
