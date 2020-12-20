@@ -44,7 +44,7 @@ func main() {
   break
   }
   var NBboucles int
-  restelargeur := math.Mod(float64(largeur),Decoupe)
+  restelargeur := math.Mod(float64(largeur),float64(Decoupe))
   if restelargeur != 0{
     NBboucles = (largeur/Decoupe)+1
   } 
@@ -55,8 +55,8 @@ func main() {
   var TabImageEga [65536]float32
   c1 := make(chan [32768]uint32)
   c2 := make(chan [32768]uint32)
-  c3 := make(chan [32768]uint32)
-  c4 := make(chan [32768]uint32)
+  c3 := make(chan [32768]float32)
+  c4 := make(chan [32768]float32)
   for i:=largeur ; i>0; i=i-Decoupe{
     if i>Decoupe{
       go  histogramme(imData,(i-Decoupe),i,c1,c2)
@@ -77,25 +77,20 @@ func main() {
       HistogrammePixel[p] += tabC2[b][p-32768]
     }
   }
-  TabDesProba := probapixel(HistogrammePixel,NombrePixel)
+  TabDesProba := probapixel(HistogrammePixel,NbPixel)
   for i:=largeur ; i>0; i=i-Decoupe{
-    if i>Decoupe{
-      go  egalisation(imData,(i-Decoupe),i,c3,c4)
+      go egalisation(TabDesProba,imData,c3,c4)
     }
-    if i<Decoupe{
-      go egalisation(imData,0,i,c3,c4)
-    }
-  }
   var tabC3 [][32768]float32
   var tabC4 [][32768]float32
   for b:=0; b<NBboucles; b++{
     tabC3[b] = <- c3
     tabC4[b] = <- c4 
     for p:=0; p<32768; p++{
-      TabImageEga[p] += tabC1[b][p]
+      TabImageEga[p] += tabC3[b][p]
     }
     for p:=32768; p<65536; p++{
-      TabImageEga[p] += tabC2[b][p-32768]
+      TabImageEga[p] += tabC4[b][p-32768]
     }
   }
   creationimage(imData, TabImageEga)
@@ -125,7 +120,7 @@ func histogramme(Data image.Image, largeur1 int, largeur2 int, c1 chan [32768]ui
   c2 <- ValuePixel2
 }
 
-func probapixel(ValuePixel []uint32, NombrePixel int) [65536]float32{
+func probapixel(ValuePixel [65536]uint32, NombrePixel int) [65536]float32{
   var ProbaPixelCumul [65536]float32 // Tableau des probas cumulées
   var max uint32 // Variable permettant de faire la cumulation des probas
   max = 0 
@@ -137,9 +132,9 @@ func probapixel(ValuePixel []uint32, NombrePixel int) [65536]float32{
   return ProbaPixelCumul
 }
 
-func egalisation(ProbaPixelCumul [65536]float32, Data image.Image, c3 chan [32768]uint32, c4 chan [32768]uint32){
-  var ImageEga1 [65536]float32 // Tableau contenant les intensités de pixels égalisés
-  var ImageEga2 [65536]float32
+func egalisation(ProbaPixelCumul [65536]float32, Data image.Image, c3 chan [32768]float32, c4 chan [32768]float32){
+  var ImageEga1 [32768]float32 // Tableau contenant les intensités de pixels égalisés
+  var ImageEga2 [32768]float32
   // ImagEga[z] = x
   // z correspond à l'intensité du pixel sur l'image de base
   // x sera la nouvelle intensité pour l'image égalisée
@@ -163,7 +158,7 @@ c3 <- ImageEga1
 c4 <- ImageEga2
 }
 
-func creationimage(Data image.Image, ImageEga []float32)  {
+func creationimage(Data image.Image, ImageEga [65536]float32)  {
   // Création de l'image égalisée
   taille := Data.Bounds()
   hauteur := taille.Dy()
