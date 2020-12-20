@@ -53,9 +53,6 @@ func main() {
   }
   var HistogrammePixel [65536]uint32
   var TabImageEga [65536]float32
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
   var chans1 [65536]chan uint32
   for i := range chans1 {
     chans1[i] = make(chan uint32)
@@ -72,7 +69,6 @@ func main() {
     }
     if i<Decoupe{
       go histogramme(imData,0,i,&chans1)
-=======
   c1 := make(chan [65536]uint32)
   c2 := make(chan [65536]float32)
   for i:=largeur ; i>0; i=i-Decoupe{
@@ -81,17 +77,38 @@ func main() {
     }
     if i<Decoupe{
       go histogramme(imData,0,i,c1)
->>>>>>> parent of 19fa495... Update main.go
+  c1 := make(chan [65536]uint32)
+  c2 := make(chan [65536]float32)
+  for i:=largeur ; i>0; i=i-Decoupe{
+    if i>Decoupe{
+      go  histogramme(imData,(i-Decoupe),i,c1)
+    }
+    if i<Decoupe{
+      go histogramme(imData,0,i,c1)
     }
   }
   var tabC1 [][65536]uint32
   for b:=0; b<NBboucles; b++{
     tabC1[b] = <- c1
     for p:=0; p<65536; p++{
-<<<<<<< HEAD
       valpix := <-chans1[p]
       HistogrammePixel[p] += valpix
-=======
+  c1 := make(chan [32768]uint32)
+  c2 := make(chan [32768]uint32)
+  c3 := make(chan [32768]float32)
+  c4 := make(chan [32768]float32)
+  for i:=largeur ; i>0; i=i-Decoupe{
+    if i>Decoupe{
+      go  histogramme(imData,(i-Decoupe),i,c1,c2)
+    }
+    if i<Decoupe{
+      go histogramme(imData,0,i,c1,c2)
+      HistogrammePixel[p] += tabC1[b][p]
+    }
+  }
+  var tabC1 [][32768]uint32
+  var tabC2 [][32768]uint32
+  for b:=0; b<NBboucles; b++{
   c1 := make(chan [32768]uint32)
   c2 := make(chan [32768]uint32)
   c3 := make(chan [32768]float32)
@@ -107,70 +124,31 @@ func main() {
   var tabC1 [][32768]uint32
   var tabC2 [][32768]uint32
   for b:=0; b<NBboucles; b++{
-=======
-  c1 := make(chan [32768]uint32)
-  c2 := make(chan [32768]uint32)
-  c3 := make(chan [32768]float32)
-  c4 := make(chan [32768]float32)
-  for i:=largeur ; i>0; i=i-Decoupe{
-    if i>Decoupe{
-      go  histogramme(imData,(i-Decoupe),i,c1,c2)
-    }
-    if i<Decoupe{
-      go histogramme(imData,0,i,c1,c2)
-    }
-  }
-  var tabC1 [][32768]uint32
-  var tabC2 [][32768]uint32
-  for b:=0; b<NBboucles; b++{
->>>>>>> parent of fca1e85... Update main.go
     tabC1[b] = <- c1
     tabC2[b] = <- c2 
     for p:=0; p<32768; p++{
       HistogrammePixel[p] += tabC1[b][p]
->>>>>>> parent of fca1e85... Update main.go
     }
     for p:=32768; p<65536; p++{
       HistogrammePixel[p] += tabC2[b][p-32768]
     }
     for p:=32768; p<65536; p++{
       HistogrammePixel[p] += tabC2[b][p-32768]
-=======
       HistogrammePixel[p] += tabC1[b][p]
->>>>>>> parent of 19fa495... Update main.go
     }
   }
   TabDesProba := probapixel(HistogrammePixel,NbPixel)
   for i:=largeur ; i>0; i=i-Decoupe{
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
     if i>Decoupe{
       go egalisation(TabDesProba,(i-Decoupe),i,imData,chans2)
-=======
       go egalisation(TabDesProba,imData,c2)
->>>>>>> parent of 19fa495... Update main.go
     }
   var tabC2 [][65536]float32
   for b:=0; b<NBboucles; b++{
     tabC2[b] = <- c2
     for p:=0; p<65536; p++{
-<<<<<<< HEAD
       valega := <- chans2[p]
       TabImageEga[p] += valega
-=======
-      go egalisation(TabDesProba,imData,c3,c4)
-    }
-  var tabC3 [][32768]float32
-  var tabC4 [][32768]float32
-  for b:=0; b<NBboucles; b++{
-=======
-      go egalisation(TabDesProba,imData,c3,c4)
-    }
-  var tabC3 [][32768]float32
-  var tabC4 [][32768]float32
-  for b:=0; b<NBboucles; b++{
->>>>>>> parent of fca1e85... Update main.go
     tabC3[b] = <- c3
     tabC4[b] = <- c4 
     for p:=0; p<32768; p++{
@@ -178,38 +156,30 @@ func main() {
     }
     for p:=32768; p<65536; p++{
       TabImageEga[p] += tabC4[b][p-32768]
-<<<<<<< HEAD
->>>>>>> parent of fca1e85... Update main.go
-=======
->>>>>>> parent of fca1e85... Update main.go
-=======
       TabImageEga[p] += tabC2[b][p]
->>>>>>> parent of 19fa495... Update main.go
+      go egalisation(TabDesProba,imData,c2)
+    }
+  var tabC2 [][65536]float32
+  for b:=0; b<NBboucles; b++{
+    tabC2[b] = <- c2
+    for p:=0; p<65536; p++{
+      TabImageEga[p] += tabC2[b][p]
     }
   }
   creationimage(imData, TabImageEga)
 }
 
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 func histogramme(Data image.Image, largeur1 int, largeur2 int, chans1 *[65536]chan uint32){
-=======
+
 func histogramme(Data image.Image, largeur1 int, largeur2 int, c1 chan [65536]uint32){
->>>>>>> parent of 19fa495... Update main.go
+func histogramme(Data image.Image, largeur1 int, largeur2 int, c1 chan [65536]uint32){
+
   var ValuePixel [65536]uint32 // Tableau qui va permettre de savoir combien il y aura de pixels pour chaque intensité
-=======
-=======
->>>>>>> parent of fca1e85... Update main.go
 
 func histogramme(Data image.Image, largeur1 int, largeur2 int, c1 chan [32768]uint32, c2 chan [32768]uint32){
   var ValuePixel1 [32768]uint32 // Tableau qui va permettre de savoir combien il y aura de pixels pour chaque intensité
   var ValuePixel2 [32768]uint32
-<<<<<<< HEAD
->>>>>>> parent of fca1e85... Update main.go
-=======
->>>>>>> parent of fca1e85... Update main.go
   taille := Data.Bounds()
 	hauteur := taille.Dy()
 
@@ -225,23 +195,15 @@ func histogramme(Data image.Image, largeur1 int, largeur2 int, c1 chan [32768]ui
       }
     }
   }
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
   for i := range *chans1 {
     *chans1[i] <- ValuePixel[i]
   }
-=======
   c1 <- ValuePixel1
   c2 <- ValuePixel2
->>>>>>> parent of fca1e85... Update main.go
-=======
   c1 <- ValuePixel1
   c2 <- ValuePixel2
->>>>>>> parent of fca1e85... Update main.go
-=======
   c1 <- ValuePixel
->>>>>>> parent of 19fa495... Update main.go
+  c1 <- ValuePixel
 }
 
 func probapixel(ValuePixel [65536]uint32, NombrePixel int) [65536]float32{
@@ -256,15 +218,11 @@ func probapixel(ValuePixel [65536]uint32, NombrePixel int) [65536]float32{
   return ProbaPixelCumul
 }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
+
 func egalisation(ProbaPixelCumul [65536]float32,largeur1 int, largeur2 int, Data image.Image, chans2 [65536]chan float32){
-=======
 func egalisation(ProbaPixelCumul [65536]float32, Data image.Image, c2 chan [65536]float32){
->>>>>>> parent of 19fa495... Update main.go
+func egalisation(ProbaPixelCumul [65536]float32, Data image.Image, c2 chan [65536]float32){
   var ImageEga [65536]float32 // Tableau contenant les intensités de pixels égalisés
-=======
 func egalisation(ProbaPixelCumul [65536]float32, Data image.Image, c3 chan [32768]float32, c4 chan [32768]float32){
   var ImageEga1 [32768]float32 // Tableau contenant les intensités de pixels égalisés
   var ImageEga2 [32768]float32
@@ -293,23 +251,15 @@ func egalisation(ProbaPixelCumul [65536]float32, Data image.Image, c3 chan [3276
       }
     }
   }
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
   for i := range chans2 {
     chans2[i] <- ImageEga[i]
   }
-=======
 c3 <- ImageEga1
 c4 <- ImageEga2
->>>>>>> parent of fca1e85... Update main.go
-=======
 c3 <- ImageEga1
 c4 <- ImageEga2
->>>>>>> parent of fca1e85... Update main.go
-=======
 c2 <- ImageEga
->>>>>>> parent of 19fa495... Update main.go
+c2 <- ImageEga
 }
 
 func creationimage(Data image.Image, ImageEga [65536]float32)  {
