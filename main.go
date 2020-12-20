@@ -65,10 +65,10 @@ func main() {
   //c2 := make(chan [65536]float32, 4)
   for i:=largeur ; i>0; i=i-Decoupe{
     if i>Decoupe{
-      go  histogramme(imData,(i-Decoupe),i,chans1)
+      go  histogramme(imData,(i-Decoupe),i,&chans1)
     }
     if i<Decoupe{
-      go histogramme(imData,0,i,chans1)
+      go histogramme(imData,0,i,&chans1)
     }
   }
   for b:=0; b<NBboucles; b++{
@@ -95,7 +95,7 @@ func main() {
 }
 
 
-func histogramme(Data image.Image, largeur1 int, largeur2 int, chans1 [65536]chan uint32){
+func histogramme(Data image.Image, largeur1 int, largeur2 int, chans1 *[65536]chan uint32){
   var ValuePixel [65536]uint32 // Tableau qui va permettre de savoir combien il y aura de pixels pour chaque intensité
   taille := Data.Bounds()
 	hauteur := taille.Dy()
@@ -106,8 +106,8 @@ func histogramme(Data image.Image, largeur1 int, largeur2 int, chans1 [65536]cha
         ValuePixel[r] = ValuePixel[r] + 1
     }
   }
-  for i := range chans1 {
-    chans1[i] <- ValuePixel[i]
+  for i := range *chans1 {
+    *chans1[i] <- ValuePixel[i]
   }
 }
 
