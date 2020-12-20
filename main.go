@@ -85,6 +85,7 @@ func histogramme(Data image.Image) [65536]uint32{
     }
     return ValuePixel
   }
+
 func ProbaPixel(ValuePixel []uint32, NombrePixel int) [65536]float32{
     var ProbaPixelCumul [65536]float32 // Tableau des probas cumulées
     var max uint32 // Variable permettant de faire la cumulation des probas
@@ -97,26 +98,26 @@ func ProbaPixel(ValuePixel []uint32, NombrePixel int) [65536]float32{
     return ProbaPixelCumul
 }
 
-func normalisation(ProbaPixelCumul []float32, Data image.Image) [65536]float32{
-    var ImageNorma [65536]float32 // Tableau contenant les intensités de pixels normalisés
-    // ImageNorma[z] = x
+func egalisation(ProbaPixelCumul []float32, Data image.Image) [65536]float32{
+    var ImageEga [65536]float32 // Tableau contenant les intensités de pixels égalisés
+    // ImageEga[z] = x
     // z correspond à l'intensité du pixel sur l'image de base
-    // x sera la nouvelle intensité pour l'image normalisée
+    // x sera la nouvelle intensité pour l'image égalisée
 
-    // Dans cette boucle, on calcule les nouvelles inensités (égalisé) avec la formule
+    // Dans cette boucle, on calcule les nouvelles inensités (égalisées) avec la formule
     taille := Data.Bounds()
 	  hauteur := taille.Dy()
     largeur := taille.Dx()
     for i := 0; i < largeur; i++ {
       for j := 0; j < hauteur; j++ {
         r, _, _, _ := Data.At(i, j).RGBA() // Pareil que ma boucle précédente
-        ImageNorma[r] = 65535 * ProbaPixelCumul[r] // Formule pour normalisé une image
+        ImageEga[r] = 65535 * ProbaPixelCumul[r] // Formule pour normalisé une image
       }
     }
-  return ImageNorma
+  return ImageEga
   }
-func creationimage(Data image.Image, ImageNorma []float32)  {
-  // Création de l'image normalisée
+func creationimage(Data image.Image, ImageEga []float32)  {
+  // Création de l'image égalisée
   taille := Data.Bounds()
   hauteur := taille.Dy()
   largeur := taille.Dx()
@@ -124,7 +125,7 @@ func creationimage(Data image.Image, ImageNorma []float32)  {
   for i := 0; i < largeur; i++ {
     for j := 0; j < hauteur; j++ {
       r, g, b, _ := Data.At(i, j).RGBA()
-      lum := 0.299*float64(ImageNorma[r]) + 0.587*float64(g) + 0.114*float64(b)
+      lum := 0.299*float64(ImageEga[r]) + 0.587*float64(g) + 0.114*float64(b)
       pixel := color.Gray16{uint16(lum)}
       imgSet.Set(i,j, pixel)
     }
