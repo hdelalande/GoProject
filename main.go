@@ -68,20 +68,13 @@ func main() {
     jpeg.Encode(outFile, imgSet, nil)
     testNoirEtBlanc = true
   }
-
-  if testNoirEtBlanc == true{
-    egalisation(imData)
-  }
   //wg.Wait()
 }
-
-func egalisation(Data image.Image){
+func histogramme(Data image.Image) [65536]uint32{
     var ValuePixel [65536]uint32 // Tableau qui va permettre de savoir combien il y aura de pixels pour chaque intensité
-    var NombrePixel int // Nombre de pixels sur l'image
     taille := Data.Bounds()
 	  hauteur := taille.Dy()
     largeur := taille.Dx()
-    NombrePixel = largeur * hauteur
 
     // Dans cette boucle, on compte le nbr de pixels par intensité
     for i := 0; i < largeur; i++ {
@@ -90,7 +83,9 @@ func egalisation(Data image.Image){
         ValuePixel[r] = ValuePixel[r] + 1 // On ajoute 1 à l'index d'intensité r
       }
     }
-
+    return ValuePixel
+  }
+func ProbaPixel(ValuePixel []uint32, NombrePixel int) [65536]float32{
     var ProbaPixelCumul [65536]float32 // Tableau des probas cumulées
     var max uint32 // Variable permettant de faire la cumulation des probas
     max = 0 
@@ -99,37 +94,48 @@ func egalisation(Data image.Image){
       max = max + ValuePixel[i] // Pour faire la proba cumulée
       ProbaPixelCumul[i] = float32(max) / float32(NombrePixel) // On divise ce nbr de pixels par le nombre total de pixel
     }
+    return ProbaPixelCumul
+}
 
+func normalisation(ProbaPixelCumul []float32, Data image.Image) [65536]float32{
     var ImageNorma [65536]float32 // Tableau contenant les intensités de pixels normalisés
     // ImageNorma[z] = x
     // z correspond à l'intensité du pixel sur l'image de base
     // x sera la nouvelle intensité pour l'image normalisée
 
     // Dans cette boucle, on calcule les nouvelles inensités (égalisé) avec la formule
+    taille := Data.Bounds()
+	  hauteur := taille.Dy()
+    largeur := taille.Dx()
     for i := 0; i < largeur; i++ {
       for j := 0; j < hauteur; j++ {
         r, _, _, _ := Data.At(i, j).RGBA() // Pareil que ma boucle précédente
         ImageNorma[r] = 65535 * ProbaPixelCumul[r] // Formule pour normalisé une image
       }
     }
-
-    // Création de l'image normalisée
-    imgSet := image.NewRGBA(taille)
-    for i := 0; i < largeur; i++ {
-      for j := 0; j < hauteur; j++ {
-        r, _, _, _ := Data.At(i, j).RGBA()
-        lum := float64(ImageNorma[r])
-        pixel := color.Gray16{uint16(lum)}
-        imgSet.Set(i,j, pixel)
-      }
+  return ImageNorma
+  }
+func creationimage(Data image.Image, ImageNorma []float32)  {
+  // Création de l'image normalisée
+  taille := Data.Bounds()
+  hauteur := taille.Dy()
+  largeur := taille.Dx()
+  imgSet := image.NewRGBA(taille)
+  for i := 0; i < largeur; i++ {
+    for j := 0; j < hauteur; j++ {
+      r, g, b, _ := Data.At(i, j).RGBA()
+      lum := 0.299*float64(ImageNorma[r]) + 0.587*float64(g) + 0.114*float64(b)
+      pixel := color.Gray16{uint16(lum)}
+      imgSet.Set(i,j, pixel)
     }
+  }
 
-    outFile, err := os.Create("test.jpg")
-    if err != nil {
-      log.Fatal(err)
-    }
-    defer outFile.Close()
-    jpeg.Encode(outFile, imgSet, nil)
+  outFile, err := os.Create("test.jpg")
+  if err != nil {
+    log.Fatal(err)
+  }
+  defer outFile.Close()
+  jpeg.Encode(outFile, imgSet, nil)
 
 }
 
