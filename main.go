@@ -8,6 +8,7 @@ import (
 //  "image"
   "image/jpeg"
   "log"
+  //"math"
   //"sync"
 )
 
@@ -27,9 +28,10 @@ func main() {
   var testNoirEtBlanc bool
   taille := imData.Bounds()
 	hauteur := taille.Dy()
-  largeur := taille.Dx() 
-  //NBboucles := hauteur*largeur
+  largeur := taille.Dx()
+  //restelargeur := math.Mod(float64(largeur),100) 
   testNoirEtBlanc = true
+  //NBboucles := (largeur/100)+1
   //var wg sync.WaitGroup
   //wg.Add(NBboucles)
   for i:=0; i<largeur; i++ {
@@ -45,7 +47,7 @@ func main() {
     }
     break
   }
-  //wg.Wait()
+
   if testNoirEtBlanc == false {
     /*Dans cette partie, nous transformons l'image en noir est blanc si ce n'est pas le cas*/
     imgSet := image.NewRGBA(taille) //on commence par créer une image "vide" de la même taille que l'image d'origine.
@@ -67,16 +69,24 @@ func main() {
     testNoirEtBlanc = true
   }
 
-  if testNoirEtBlanc == true {
+  if testNoirEtBlanc == true{
+    egalisation(imData)
+  }
+  //wg.Wait()
+}
 
+func egalisation(Data image.Image){
     var ValuePixel [65536]uint32 // Tableau qui va permettre de savoir combien il y aura de pixels pour chaque intensité
     var NombrePixel int // Nombre de pixels sur l'image
+    taille := Data.Bounds()
+	  hauteur := taille.Dy()
+    largeur := taille.Dx()
     NombrePixel = largeur * hauteur
 
     // Dans cette boucle, on compte le nbr de pixels par intensité
     for i := 0; i < largeur; i++ {
       for j := 0; j < hauteur; j++ {
-        r, _, _, _ := imData.At(i, j).RGBA() // On récupère la valeur du pixel en RGBA
+        r, _, _, _ := Data.At(i, j).RGBA() // On récupère la valeur du pixel en RGBA
         ValuePixel[r] = ValuePixel[r] + 1 // On ajoute 1 à l'index d'intensité r
       }
     }
@@ -98,7 +108,7 @@ func main() {
     // Dans cette boucle, on calcule les nouvelles inensités (égalisé) avec la formule
     for i := 0; i < largeur; i++ {
       for j := 0; j < hauteur; j++ {
-        r, _, _, _ := imData.At(i, j).RGBA() // Pareil que ma boucle précédente
+        r, _, _, _ := Data.At(i, j).RGBA() // Pareil que ma boucle précédente
         ImageNorma[r] = 65535 * ProbaPixelCumul[r] // Formule pour normalisé une image
       }
     }
@@ -107,7 +117,7 @@ func main() {
     imgSet := image.NewRGBA(taille)
     for i := 0; i < largeur; i++ {
       for j := 0; j < hauteur; j++ {
-        r, _, _, _ := imData.At(i, j).RGBA()
+        r, _, _, _ := Data.At(i, j).RGBA()
         lum := float64(ImageNorma[r])
         pixel := color.Gray16{uint16(lum)}
         imgSet.Set(i,j, pixel)
@@ -121,6 +131,9 @@ func main() {
     defer outFile.Close()
     jpeg.Encode(outFile, imgSet, nil)
 
+}
+
+    
     /* //////////// QUELQUES LIGNES POUR DEBUGUER EN CAS DE PROBLEME ////////////
 
     var total uint32
@@ -164,5 +177,3 @@ func main() {
     fmt.Println(cat)
 
     //////////// QUELQUES LIGNES POUR DEBUGUER EN CAS DE PROBLEME //////////// */
-  }
-}
