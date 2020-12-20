@@ -53,71 +53,49 @@ func main() {
   }
   var HistogrammePixel [65536]uint32
   var TabImageEga [65536]float32
-  c1 := make(chan [32768]uint32)
-  c2 := make(chan [32768]uint32)
-  c3 := make(chan [32768]float32)
-  c4 := make(chan [32768]float32)
+  c1 := make(chan [65536]uint32)
+  c2 := make(chan [65536]float32)
   for i:=largeur ; i>0; i=i-Decoupe{
     if i>Decoupe{
-      go  histogramme(imData,(i-Decoupe),i,c1,c2)
+      go  histogramme(imData,(i-Decoupe),i,c1)
     }
     if i<Decoupe{
-      go histogramme(imData,0,i,c1,c2)
+      go histogramme(imData,0,i,c1)
     }
   }
-  var tabC1 [][32768]uint32
-  var tabC2 [][32768]uint32
+  var tabC1 [][65536]uint32
   for b:=0; b<NBboucles; b++{
     tabC1[b] = <- c1
-    tabC2[b] = <- c2 
-    for p:=0; p<32768; p++{
+    for p:=0; p<65536; p++{
       HistogrammePixel[p] += tabC1[b][p]
-    }
-    for p:=32768; p<65536; p++{
-      HistogrammePixel[p] += tabC2[b][p-32768]
     }
   }
   TabDesProba := probapixel(HistogrammePixel,NbPixel)
   for i:=largeur ; i>0; i=i-Decoupe{
-      go egalisation(TabDesProba,imData,c3,c4)
+      go egalisation(TabDesProba,imData,c2)
     }
-  var tabC3 [][32768]float32
-  var tabC4 [][32768]float32
+  var tabC2 [][65536]float32
   for b:=0; b<NBboucles; b++{
-    tabC3[b] = <- c3
-    tabC4[b] = <- c4 
-    for p:=0; p<32768; p++{
-      TabImageEga[p] += tabC3[b][p]
-    }
-    for p:=32768; p<65536; p++{
-      TabImageEga[p] += tabC4[b][p-32768]
+    tabC2[b] = <- c2
+    for p:=0; p<65536; p++{
+      TabImageEga[p] += tabC2[b][p]
     }
   }
-  creationimage(imData, TabImageEga)
 }
 
 
-
-func histogramme(Data image.Image, largeur1 int, largeur2 int, c1 chan [32768]uint32, c2 chan [32768]uint32){
-  var ValuePixel1 [32768]uint32 // Tableau qui va permettre de savoir combien il y aura de pixels pour chaque intensité
-  var ValuePixel2 [32768]uint32
+func histogramme(Data image.Image, largeur1 int, largeur2 int, c1 chan [65536]uint32){
+  var ValuePixel [65536]uint32 // Tableau qui va permettre de savoir combien il y aura de pixels pour chaque intensité
   taille := Data.Bounds()
 	hauteur := taille.Dy()
-
   // Dans cette boucle, on compte le nbr de pixels par intensité
   for i := largeur1; i < largeur2; i++ {
     for j := 0; j < hauteur; j++ {
       r, _, _, _ := Data.At(i, j).RGBA() // On récupère la valeur du pixel en RGBA
-      if r < 32768{
-        ValuePixel1[r] = ValuePixel1[r] + 1 // On ajoute 1 à l'index d'intensité r
-      }
-      if r >= 32768{
-        ValuePixel2[r-32768] = ValuePixel2[r-32768] + 1
-      }
+        ValuePixel[r] = ValuePixel[r] + 1
     }
   }
-  c1 <- ValuePixel1
-  c2 <- ValuePixel2
+  c1 <- ValuePixel
 }
 
 func probapixel(ValuePixel [65536]uint32, NombrePixel int) [65536]float32{
@@ -132,9 +110,8 @@ func probapixel(ValuePixel [65536]uint32, NombrePixel int) [65536]float32{
   return ProbaPixelCumul
 }
 
-func egalisation(ProbaPixelCumul [65536]float32, Data image.Image, c3 chan [32768]float32, c4 chan [32768]float32){
-  var ImageEga1 [32768]float32 // Tableau contenant les intensités de pixels égalisés
-  var ImageEga2 [32768]float32
+func egalisation(ProbaPixelCumul [65536]float32, Data image.Image, c2 chan [65536]float32){
+  var ImageEga [65536]float32 // Tableau contenant les intensités de pixels égalisés
   // ImagEga[z] = x
   // z correspond à l'intensité du pixel sur l'image de base
   // x sera la nouvelle intensité pour l'image égalisée
@@ -146,16 +123,10 @@ func egalisation(ProbaPixelCumul [65536]float32, Data image.Image, c3 chan [3276
   for i := 0; i < largeur; i++ {
     for j := 0; j < hauteur; j++ {
       r, _, _, _ := Data.At(i, j).RGBA() // Pareil que ma boucle précédente
-      if r < 32768{
-        ImageEga1[r] = 65535 * ProbaPixelCumul[r] // Formule pour normalisé une image
-      }
-      if r >= 32768{
-        ImageEga2[r] = 65535 * ProbaPixelCumul[r]
-      }
+      ImageEga[r] = 65535 * ProbaPixelCumul[r] // Formule pour normalisé une image
     }
   }
-c3 <- ImageEga1
-c4 <- ImageEga2
+c2 <- ImageEga
 }
 
 func creationimage(Data image.Image, ImageEga [65536]float32)  {
