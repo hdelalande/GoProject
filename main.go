@@ -86,8 +86,8 @@ func main() {
       go egalisation(imData,0,i,c3,c4)
     }
   }
-  var tabC3 [][32768]uint32
-  var tabC4 [][32768]uint32
+  var tabC3 [][32768]float32
+  var tabC4 [][32768]float32
   for b:=0; b<NBboucles; b++{
     tabC3[b] = <- c3
     tabC4[b] = <- c4 
