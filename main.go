@@ -31,11 +31,15 @@ func main() {
   largeur := taille.Dx()
   NbPixel := largeur*hauteur
   Decoupe := 100
-  r := make([][]uint32,NbPixel)
-  g := make([][]uint32,NbPixel)
-  b := make([][]uint32,NbPixel)
-  a := make([][]uint32,NbPixel)
+  r := make([][]uint32,largeur)
+  g := make([][]uint32,largeur)
+  b := make([][]uint32,largeur)
+  a := make([][]uint32,largeur)
   for i:=0; i<largeur; i++ {
+    r[i] = make([]uint32,hauteur)
+    g[i] = make([]uint32,hauteur)
+    b[i] = make([]uint32,hauteur)
+    a[i] = make([]uint32,hauteur)
     for j:=0; j<hauteur; j++{
     r[i][j],g[i][j],b[i][j],a[i][j] = imData.At(i,j).RGBA()
       if r[i][j]!=g[i][j] || g[i][j]!=b[i][j] || r[i][j]!=b[i][j] { /*test si les intensités RGB sont différente pour detecter si l'image est en couleur*/
