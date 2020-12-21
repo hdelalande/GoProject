@@ -77,12 +77,8 @@ func main() {
   var wg2 sync.WaitGroup
   wg2.Add(NBboucles)
   for i:=largeur ; i>0; i=i-Decoupe{
-    if i>Decoupe{
-      go egalisation(&ImageEgalise,&TabDesProba,r,&hauteur,(i-Decoupe),i,&wg2)
-    }
-    if i<Decoupe{
-      go egalisation(&ImageEgalise,&TabDesProba,r,&hauteur,0,i,&wg2)
-    }
+      go egalisation(&ImageEgalise,&TabDesProba,&wg2)
+    
   }
   /*
   var tabC2 [][65536]float32
@@ -122,19 +118,16 @@ func probapixel(ValuePixel [65536]uint32, NombrePixel int) [65536]float32{
   return ProbaPixelCumul
 }
 
-func egalisation(ImageEga *[65536]float32, ProbaPixelCumul *[65536]float32,tab [][]uint32,hauteur *int,largeur1 int, largeur2 int, wg2 *sync.WaitGroup){
+func egalisation(ImageEga *[65536]float32, ProbaPixelCumul *[65536]float32, wg2 *sync.WaitGroup){
   // Tableau contenant les intensités de pixels égalisés
   // ImagEga[z] = x
   // z correspond à l'intensité du pixel sur l'image de base
   // x sera la nouvelle intensité pour l'image égalisée
 
   // Dans cette boucle, on calcule les nouvelles inensités (égalisées) avec la formule
-  for i := largeur1; i < largeur2; i++ {
-    for j := 0; j < *hauteur; j++ {
-      r:=tab[i][j] // On récupère la valeur du pixel en RGBA
+  for r:=0;r<65536;r++{
       ImageEga[r] = 65535 * ProbaPixelCumul[r] // Formule pour normalisé une image
     }
-  }
   wg2.Done()
   //c2 <- ImageEga
 }
