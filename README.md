@@ -1,8 +1,6 @@
 # GoProject
 Ce programme traite des images de type JPEG.
-L'image passe par un test pour connaître sa nature (Noir et blanc ou en couleurs). Si elle est en couleur,
-l'image est transformée en noir et blanc.
-Ensuite, l'image est égalisée (On ajuste le contraste de l'image à l'aide d'une formule). 
+L'image passe par un test pour connaître sa nature (B&W ou en couleur). Si elle est en couleur, l'image est transformée en B&W. Ensuite, l'image est égalisée (On ajuste le contraste de l'image à l'aide d'une formule). 
 Pour exécuter le programme :
 go run <nom du fichier.go> <nom de l'image .jpeg>
 Vous aurez en sortie une ou deux nouvelles images :
