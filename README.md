@@ -1,4 +1,5 @@
 # GoProject
+L'objectif de ce projet a été d'égaliser une image en B&W.
 Ce programme traite des images de type JPEG.
 L'image passe par un test pour connaître sa nature (B&W ou en couleur). Si elle est en couleur, l'image est transformée en B&W. Ensuite, l'image est égalisée (On ajuste le contraste de l'image à l'aide d'une formule). 
 Pour exécuter le programme :
