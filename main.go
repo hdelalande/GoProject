@@ -30,11 +30,13 @@ func main() {
   hauteur := taille.Dy()
   largeur := taille.Dx()
   NbPixel := largeur*hauteur
-  Decoupe := 100
-  r := make([][]uint32,largeur)
+  Decoupe := 100 // Ici nous pouvons paramétrer directement la largeur pour laquelle nous allons découper l'image
+  r := make([][]uint32,largeur) 
   g := make([][]uint32,largeur)
   b := make([][]uint32,largeur)
   a := make([][]uint32,largeur)
+  // Ces quatre tableaux sont des des tableaux à deux dimensions qui auront pour indices la position du pixel en x et y. 
+  // Les valeurs stockées seront les intensités R,G,B et A
   for i:=0; i<largeur; i++ {
     r[i] = make([]uint32,hauteur)
     g[i] = make([]uint32,hauteur)
@@ -50,18 +52,15 @@ func main() {
     }
   }
   var NBboucles int
-  restelargeur := math.Mod(float64(largeur),float64(Decoupe))
+  restelargeur := math.Mod(float64(largeur),float64(Decoupe)) // test de vérification si il y'aura un reste lorsque l'on découpera l'image
   if restelargeur != 0{
     NBboucles = (largeur/Decoupe)+1
   } 
   if restelargeur == 0{
     NBboucles = (largeur/Decoupe)
   }
-  var HistogrammePixel [65536]uint32
-  //var TabImageEga [65536]float32
-  var ImageEgalise [65536]float32
-  //c1 := make(chan [65536]uint32)
-  //c2 := make(chan [65536]float32)
+  var HistogrammePixel [65536]uint32 // tableau de l'histogramme
+  var ImageEgalise [65536]float32 // Tableau contenant la valeur de l'intensité des pixels normalisés
   var wg1 sync.WaitGroup
   wg1.Add(NBboucles)
   for i:=largeur ; i>0; i=i-Decoupe{
@@ -80,15 +79,6 @@ func main() {
       go egalisation(&ImageEgalise,&TabDesProba,&wg2)
     
   }
-  /*
-  var tabC2 [][65536]float32
-  for b:=0; b<NBboucles; b++{
-    tabC2[b] = <- c2
-    for p:=0; p<65536; p++{
-      TabImageEga[p] += tabC2[b][p]
-    }
-  }
-  */
   creationimage(imData,ImageEgalise)
 }
 
@@ -147,7 +137,7 @@ func creationimage(Data image.Image, ImageEga [65536]float32)  {
     }
   }
 
-  outFile, err := os.Create("test.jpg")
+  outFile, err := os.Create("imagenormalisée.jpg")
   if err != nil {
     log.Fatal(err)
   }
