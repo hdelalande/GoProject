@@ -13,7 +13,7 @@ Vous aurez en sortie une ou deux nouvelles images :
 
 Vous trouverez dans le GitHub deux programmes :
 
-- mainsansgoroutine.go : le programme fonctionne sans goroutine.
+- mainsansgoroutine.go : le programme fonctionne sans goroutine
 - main.go : le programme fonctionne avec des goroutines
 
 Les fichiers restants sont des images en B&W ou couleur afin de pouvoir les mettre en entré du programme.
